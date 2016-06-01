@@ -3,8 +3,8 @@ Quynh Nguyen
 SID: 861149235
 Project Name: Linked
 Description:
-
-
+Linked is a two-player cooperative game that involves solving mini games to keep your partner alive. 
+The objective of the game is to survive as long as possible.
 */
 #include <avr/io.h>
 #include "io.c"
@@ -17,26 +17,8 @@ Description:
 #include <math.h>
 #include "usart.h"
 
-static unsigned long seed = 1;
-
-/**************************Player Stats**************************/
-typedef struct playerStats {
-	unsigned char totalSIN;
-	unsigned char SINwin;
-	unsigned char totalSS;
-	unsigned char SSwin;
-	unsigned char totalSM;
-	unsigned char SMwin;
-} player;
-
-static player Player;
-
-void initPlayer(){
-	Player.totalSIN = 0;
-	Player.SINwin = 0;
-	Player.totalSS = 0;
-	Player.SSwin = 0;
-}
+static unsigned long seed = 17;
+void initPlayer();
 
 /**************************ADC Init**************************/
 void ADC_init() {
@@ -131,7 +113,8 @@ void TimerISR(){
 			tasks[i]->elapsedTime = 0;
 		}
 		tasks[i]->elapsedTime += 1;
-		seed = seed + 10;
+		if (seed == 4000000000) seed = rand() % 10;
+		seed = seed + 2;
 	}
 }
 
@@ -183,9 +166,8 @@ char* instructions[] = {"A)Next page\nB)Prev page\nC)Menu", "Welcome playerYou w
 
 int main()
 {
-
+	srand(seed);
 	numTasks = sizeof(tasks)/sizeof(task*);
-
 	/*******************Set tasks in scheduler*******************/
 	// Task 1 - Game Handler 
 	task_Start.state = Start;//Task initial state.
@@ -211,24 +193,27 @@ int main()
 	task_UpdateHealth.elapsedTime = 1;//Task current elapsed time.
 	task_UpdateHealth.TickFct = &updateHealthTick;//Function pointer for the tick.
 
-	/*******************Set minigames in Mini Game Handler*******************/
-// 
-//  	SIN_Game.state = SINStart;
-//  	SIN_Game.GameFct = &SINTick;
-//  	SIN_Game.done = 0;
+	/*******************Set minigames in Mini Game Handler*******************/ 
+  	SIN_Game.state = SINStart;
+  	SIN_Game.GameFct = &SINTick;
+  	SIN_Game.done = 0;
 	
-// 	SS_Game.state = SSStart;
-// 	SS_Game.GameFct = &SimonSaysTick;
-// 	SS_Game.done = 0;
+ 	SS_Game.state = SSStart;
+ 	SS_Game.GameFct = &SimonSaysTick;
+ 	SS_Game.done = 0;
 
-// 	SM_Game.state = SMStart;
-// 	SM_Game.GameFct = &ShapeMatchTick;
-// 	SM_Game.done = 0;
-	
-	
+ 	SM_Game.state = SMStart;
+ 	SM_Game.GameFct = &ShapeMatchTick;
+ 	SM_Game.done = 0;
+
+	R_Game.state = RStart;
+	R_Game.GameFct = &ReflexTick;
+	R_Game.done = 0;
+			
 	M_Game.state = MStart;
 	M_Game.GameFct = &MazeTick;
 	M_Game.done = 0;
+
 	//Initialize Ports
 	DDRB = 0xFF; PORTB = 0x00; // PORTB set to output, outputs init 0s
 	DDRD = 0xFF; PORTD = 0x00;

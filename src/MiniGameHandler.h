@@ -5,12 +5,10 @@ typedef struct miniGames{
 	unsigned char done;
 
 } MG;
-// static MG SIN_Game, SS_Game;
-// MG *gamesArray[] = {&SIN_Game, &SS_Game};
-// unsigned char numGames = 2;
-static MG M_Game;
-MG *gamesArray[] = {&M_Game};
-unsigned char numGames = 1;
+
+static MG SIN_Game, SS_Game, SM_Game, R_Game, M_Game;
+MG *gamesArray[] = {&SIN_Game, &SS_Game, &SM_Game, &R_Game, &M_Game};
+unsigned char numGames = 5;
 static unsigned game_index;
 enum MiniGameController {MGCStart, MGCWait, MGCOn};
 int MGC_Tick(int state){
@@ -25,7 +23,8 @@ int MGC_Tick(int state){
 		if (!game_on) state = MGCWait;
 		else if (game_on){
 			state = MGCOn;
-			game_index = 0;
+			game_index = rand() % 4;
+			initPlayer();
 		}
 		break;
 
@@ -33,7 +32,8 @@ int MGC_Tick(int state){
 		if (game_on){
 			if(interrupt)
 			{
-				gamesArray[0]->state = gamesArray[0]->GameFct(gamesArray[0]->state);
+				game_index = 4;
+				gamesArray[game_index]->state = gamesArray[game_index]->GameFct(gamesArray[game_index]->state);
 			}
 			else if (!interrupt)
 			{
@@ -41,12 +41,11 @@ int MGC_Tick(int state){
 			}
 			if (gamesArray[game_index]->done == 1){
 				gamesArray[game_index]->done = 0;
-				game_index = rand() % 2;
-				interrupt = 1;
-// 				if (game_index + 1 == numGames) game_index = 0;
-// 				else game_index++;
-			}
-			
+				unsigned char temp_index = rand() % 4;
+				while (temp_index == game_index) temp_index = rand() % 4; //so the player doesn't play the same game twice in a row
+				game_index = temp_index;
+				interrupt = 0;
+			}		
 		}
 		else if (!game_on) state = MGCStart;
 		break;

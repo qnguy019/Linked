@@ -115,17 +115,6 @@ int Game_Handler_Tick(int state){
 		case ON:
 		if (end){
 			state = ENDGAME;
-			_delay_ms(100);
-			lcd_clear_space(1,5);
-			lcd_goto_xy(0,1);
-			lcd_string_format("6 in 9: %u/%u", Player.SINwin, Player.totalSIN);
-
-			lcd_goto_xy(0,2);
-			lcd_string_format("SS: %u/%u", Player.SSwin, Player.totalSS);
-
-			lcd_goto_xy(0,3);
-			lcd_string_format("SM: %u/%u", Player.SMwin, Player.totalSM);
-
 			end = 0;
 			start = 0; //possibly problem with placements
 		}

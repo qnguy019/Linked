@@ -4,9 +4,7 @@ typedef struct timer {
 } timerCntrl;
 
 static timerCntrl mainTimer;
-
 void outputTime(){ //Task tick function
-	_delay_ms(100);
 	if (mainTimer.sec1++ == 9) {
 		mainTimer.sec2++;
 		mainTimer.sec1 = 0;
@@ -24,10 +22,12 @@ void outputTime(){ //Task tick function
 		if (mainTimer.min1 == 1){
 			phase = 0x02;
 			interrupt = 1;
+			health = 0x3FF;
 		}
 		else if (mainTimer.min1 == 3){
 			phase = 0x03;
 			interrupt = 1;
+			health = 0x3FF;
 		}
 		mainTimer.sec2 = 0;
 		lcd_goto_xy(3, 0);
@@ -70,7 +70,6 @@ int TimerControlTick(int state){
 			health = 0x03FF;
 			state = GameTimerOn;
 			resetTimer();
-			_delay_ms(100);
 			lcd_goto_xy(0,0);
 			lcd_chr('0' + mainTimer.min2);
 			lcd_goto_xy(1,0);

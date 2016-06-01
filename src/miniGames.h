@@ -1,8 +1,51 @@
-/*
-Stores minigames states
-*/
+typedef struct playerStats {
+	unsigned char totalSIN;
+	unsigned char SINwin;
+	unsigned char totalSS;
+	unsigned char SSwin;
+	unsigned char totalSM;
+	unsigned char SMwin;
+	unsigned char totalR;
+	unsigned char Rwin;
+	unsigned char totalM;
+	unsigned char Mwin;
+} player;
 
+static player Player;
 
+void initPlayer(){
+	Player.totalSIN = 0;
+	Player.SINwin = 0;
+	Player.totalSS = 0;
+	Player.SSwin = 0;
+	Player.totalSM = 0;
+	Player.SMwin = 0;
+	Player.totalR = 0;
+	Player.Rwin = 0;
+	Player.totalM = 0;
+	Player.Mwin = 0;
+}
+void outputEndGame(){
+	lcd_clear_space(1,5);
+	lcd_goto_xy(0,1);
+	lcd_string_format("6 in 9: %d/%d", Player.SINwin, Player.totalSIN);
+
+	lcd_goto_xy(0,2);
+	lcd_string_format("S Says: %d/%d", Player.SSwin, Player.totalSS);
+
+	lcd_goto_xy(0,3);
+	lcd_string_format("Shape:  %d/%d", Player.SMwin, Player.totalSM);
+
+	lcd_goto_xy(0,4);
+	lcd_string_format("Reflex: %d/%d", Player.Rwin, Player.totalR);
+
+	lcd_goto_xy(0,5);
+	lcd_string_format("Maze:   %d/%d", Player.Mwin, Player.totalM);
+
+	lcd_goto_xy(7,0);
+	lcd_string_format("C)Menu");
+}
+/*Stores mini game states*/
 /********************Six in Nines********************/
 /*
 Objective: To find the number of six's in nines
@@ -36,7 +79,7 @@ int SINTick(int state){
 			lcd_string_format("# of 6 in 9?");
 			if (phase == 0x01) max_time = 100;
 			else if (phase == 0x02) max_time = 80;
-			else if (phase == 0x03) max_time = 60;
+			else if (phase == 0x03) max_time = 70;
 			srand(seed);
 			for (int i=0;i<14;i++)
 			for (int j=2;j<6;j++) {
@@ -50,6 +93,8 @@ int SINTick(int state){
 			Player.totalSIN++;
 
 		}
+		else if (!game_on) state = SINWait;
+		else state = SINWait;
 		break;
 
 		case SINGame:
@@ -147,7 +192,9 @@ unsigned char checkInput(){
     adc_value_UD == 0x0044 || adc_value_UD == 0x0077|| adc_value_UD == 0x0054 || adc_value_UD == 0x005F ||  adc_value_UD ==  0X005B ||
     adc_value_UD == 0x006D || adc_value_UD == 0x006F|| adc_value_UD == 0x0058|| adc_value_UD == 0X0059 || adc_value_UD == 0X0069||
     adc_value_UD == 0X0061 || adc_value_UD ==0X0062|| adc_value_UD == 0X0063|| adc_value_UD == 0X009F|| adc_value_UD == 0X007D ||
-    adc_value_UD ==0X008B|| adc_value_UD == 0X007C ||adc_value_UD == 0x0055 || adc_value_UD == 0x0053 || adc_value_UD == 0x0052) return 1; //left 0x006D
+    adc_value_UD ==0X008B|| adc_value_UD == 0X007C ||adc_value_UD == 0x0055 || adc_value_UD == 0x0053 || adc_value_UD == 0x0052
+    || adc_value_UD == 0x003F || adc_value_UD == 0x007F || adc_value_UD == 0x047 || adc_value_UD == 0x004F || adc_value_UD == 0x004B
+   	||adc_value_UD == 0x006B || adc_value_UD == 0x006) return 1; //left 0x006D
   	else if (adc_value_UD == 0x03FF) return 0; //right
   	else if (adc_value_LR == 0x003F || adc_value_LR == 0x0096 || adc_value_LR == 0x0040 || adc_value_LR == 0x0041 || adc_value_LR == 0x0047 ||
 	adc_value_LR == 0x05D ||adc_value_LR == 0x005F ||adc_value_LR == 0x0077 || adc_value_LR == 0x003D ||
@@ -181,7 +228,7 @@ int SimonSaysTick(int state){
 		break;
 
 		case SSWait:
-		if (game_index == 0 && game_on){
+		if (game_index == 1 && game_on){
 			state = SSMemorize;
 			lcd_clear_space(1, 5);
 			lcd_goto_xy(0, 1);
@@ -205,10 +252,11 @@ int SimonSaysTick(int state){
 			Player.totalSS++;
 		}
 		else if (!game_on) state = SSStart; 
+		else state = SSStart;
 		break;
 
 		case SSMemorize:
-		if (time_count >= 50){
+		if (time_count >= 70){
 			state = SSAnswer;
 			time_count = 0;
 			seq_index = 0;
@@ -217,13 +265,13 @@ int SimonSaysTick(int state){
 			buttonPress = 0;
 			lcd_clear_space(1, 5);
 			lcd_goto_xy(0, 1);
-			lcd_string_format("Use joystick. Confirm with A");
+			lcd_string_format("Use joystick &press A to\nconfirm each\ndirection.");
 		}
 		else time_count++;
 		break;
 
 		case SSAnswer:
-		if (time_count >= 90){
+		if (time_count >= 110){
     		state = SSDone;
     		time_count = 0;
     		lcd_clear_space(1, 5);
@@ -356,24 +404,27 @@ int ShapeMatchTick(int state){
 		break;
 
 		case SMWait:
-		if (game_index == 0 && game_on){
+		if (game_index == 2 && game_on){
 			//srand(seed);
 			state = SMInstructions;
 			lcd_clear_space(1,5);
 			lcd_goto_xy(0, 1);
 			lcd_string_format("Memorize what you see");
 			Player.totalSM++;
-			answer_shape = rand() % 8;
-			shape_selected = rand () % 2;
+			
+			answer_shape = rand() % 9;
+			shape_selected = rand () % 3;
 			if (phase == 0x01) high = 30;
 			else if (phase == 0x02) high = 20;
 			else if (phase == 0x03) high = 10;
 		}
+		else if (!game_on) state = SMWait;
+		else state = SMWait;
 		break;
 
 		case SMInstructions:
 		//srand(seed);
-		random_num = rand() % 8;
+		random_num = rand() % 9;
 		if (time_count == 20 && image == 0){ //square 
 			time_count = 0;
 			image++;
@@ -405,9 +456,9 @@ int ShapeMatchTick(int state){
 		else if (time_count == high && image == 3){
 			lcd_clear_space(1,5);
 			lcd_goto_xy(0, 1);
-			if (shape_selected == 0) lcd_string_format("What number was the SQUARE?");
-			else if (shape_selected == 1) lcd_string_format("What number was the CIRCLE?");
-			else if (shape_selected == 2) lcd_string_format("What number was the TRIANGLE?");
+			if (shape_selected == 0) lcd_string_format("What number\nwasthe\nSQUARE?");
+			else if (shape_selected == 1) lcd_string_format("What number\nwas\nthe\nCIRCLE?");
+			else if (shape_selected == 2) lcd_string_format("What number\nwas\nthe\nTRIANGLE?");
 			state = SMAnswer;
 			image = 0;
 			time_count = 0;
@@ -470,38 +521,202 @@ int ShapeMatchTick(int state){
 	return state;
 
 }
+/********************It's High Noon********************/
+/*
+Objective: Press * when the ! pops up
+Difficulty: As the phase increases, players will have less time to react
+*/
 
-char map[5][14] = {
-	//	  0   1   2   3   4   5   6   7   8   9  10   11  12  13
-	{'-','-','-','-','-','-','-','-','-','-','-','-','-','-'}, //0
-	{' ',' ',' ','x','x','x',' ',' ',' ','x',' ',' ',' ','!'}, //1
-	{'!','x',' ','x',' ',' ',' ','x',' ',' ',' ',' ',' ','!'}, //2
-	{'!','x',' ',' ',' ','x','x','x',' ',' ','x','x',' ','!'}, //3
-	{'!','-','-','-','-','-','-','-','-','-','-','-',' ','!'} //4
+enum Reflex{RStart, RWait, RInstructions, RStartGame, RReaction, RDone};
+int ReflexTick(int state){
+	static unsigned char wait_time;
+	static unsigned char reaction_time;
+	static unsigned char time_count;
+	static unsigned char wonGame = 0;
+	switch(state){
+		case RStart:
+		state = RWait;
+		wait_time = 0;
+		reaction_time = 0;
+		time_count = 0;
+		break;
+
+		case RWait:
+		if (game_index == 3 && game_on){
+			state = RInstructions;
+			wait_time = (rand() % 30) + 40;
+			if (phase == 0x01) reaction_time = 5;
+			else if (phase == 0x02) reaction_time = 3;
+			else if (phase == 0x03) reaction_time = 1;
+			time_count = 0;
+			lcd_clear_space(1,5);
+			lcd_goto_xy(0, 1);
+			lcd_string_format("It's High NoonPress *\nwhen the\nexclamation\npoint pops up!");
+			Player.totalR++;
+		}
+		else if (!game_on) state = RStart;
+		else state = RStart;
+		break;
+
+		case RInstructions:
+		if (time_count == 40){
+			state = RStartGame;
+			lcd_clear_space(1,5);
+			printPictureAtPos(cowboyStart, 0, 1, 84, 48);
+		}
+		else time_count++;
+		break;
+
+		case RStartGame:
+		if (time_count == wait_time){
+			state = RReaction;
+			printPictureAtPos(cowboyGo2, 0, 1, 84, 48);
+			time_count = 0;
+			break;
+		}
+		else time_count++;
+		PORTC = 0x7F; // Enable col 4 with 0, disable others with 1?s
+		asm("nop"); // add a delay to allow PORTC to stabilize before checking
+		if (GetBit(PINC,0)==0) {
+			win = 0;
+			state = RDone;
+			lcd_clear_space(1, 5);
+			printPictureAtPos(wrong, 0, 1, 84, 30);
+			time_count = 0;
+			wonGame = 0x00;
+			break;
+		}
+
+		break;
+
+		case RReaction:
+		PORTC = 0x7F; // Enable col 4 with 0, disable others with 1?s
+		asm("nop"); // add a delay to allow PORTC to stabilize before checking
+		if (GetBit(PINC,0)==0 && time_count <= reaction_time) {
+			win = 1;
+			wonGame = 0x01;
+			state = RDone;
+			lcd_clear_space(1, 5);
+			printPictureAtPos(cowboyPlayer, 0, 1, 84, 48);
+			time_count = 0;
+			Player.Rwin++;
+			break;
+		}
+		else if (time_count > reaction_time){
+			win = 0;
+			wonGame = 0x02;
+			state = RDone;
+			lcd_clear_space(1, 5);
+			printPictureAtPos(cowboyEnemy, 0, 1, 84, 48);
+			time_count = 0;
+			break;
+		}
+		else time_count++;
+		break;
+
+		case RDone:
+		time_count++;
+		if (time_count == 1) win = 0;
+		if (time_count == 10 && wonGame == 0x01){
+			lcd_clear_space(1, 5);
+			printPictureAtPos(completed, 0, 1, 84, 30);
+		} 
+		else if (time_count == 10 && wonGame == 0x02){
+			lcd_clear_space(1, 5);
+			printPictureAtPos(wrong, 0, 1, 84, 30);
+		}
+		if (time_count == 20){
+			win = 0;
+			state = RStart;
+			gamesArray[game_index]->done = 1;
+			time_count = 0;
+			break;
+		}
+		break;
+	}
+	return state;
 };
-void generate_map1(){
+/********************Escape the Maze********************/
+/*
+Objective: Get to the G
+Difficulty: The players will (hopefully) have a more difficult time getting to the G with the second map
+One player controls left and right movement and the other player controls up and down.
+*/
+//Generate more maps if time allows
+char map1[5][14] = {
+	//	  0   1   2   3   4   5   6   7   8   9  10   11  12  13
+	{'x','x','x','x','x','x','x','x','x','x','x','x','x','x'}, //0
+	{' ',' ',' ','x','x','x',' ',' ',' ','x',' ',' ',' ','x'}, //1
+	{'x','x',' ','x',' ',' ',' ','x',' ',' ',' ',' ',' ','x'}, //2
+	{'x','x',' ',' ',' ','x','x','x',' ',' ','x','x',' ','x'}, //3
+	{'x','x','x','x','x','x','x','x','x','x','x','x','G','x'} //4
+};
+
+char map2[5][14] = {
+	//0   1   2   3   4   5   6   7   8   9  10   11  12  13
+	{' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ','x','x','x'}, //0
+	{' ',' ','x','x',' ','x','x','x','x','x',' ','x','x',' '}, //1
+	{'x','x',' ',' ',' ',' ',' ',' ',' ','x',' ',' ',' ',' '}, //2
+	{' ',' ',' ','x','x',' ',' ',' ',' ','x','x','x','x',' '}, //3
+	{' ',' ',' ',' ',' ',' ','x','x',' ',' ',' ',' ','G','x'} //4
+};
+
+char map3[5][14] = {
+	//0   1   2   3   4   5   6   7   8   9  10   11  12  13
+	{' ',' ',' ',' ',' ','x','x','x',' ',' ',' ',' ',' ',' '}, //0
+	{' ','x',' ','x',' ','x',' ',' ',' ','x','x',' ',' ',' '}, //1
+	{'x',' ',' ',' ',' ','x',' ',' ','x',' ',' ',' ','x',' '}, //2
+	{' ',' ','x',' ','x','x',' ',' ',' ',' ','x',' ','x',' '}, //3
+	{'x',' ',' ',' ',' ',' ',' ','x','x','x',' ','x','G',' '} //4
+};
+void generate_map(unsigned char phase){
 	//space means good
 	//x means bomb
 	//_ and ! means walls
-	for (int i = 0; i < 5; i++){
-		for(int j = 0; j < 14; j++){
-			lcd_goto_xy(j, i+1);
-			lcd_chr(map[i][j]);
+	if (phase == 0x01){
+		for (int i = 0; i < 5; i++){
+			for(int j = 0; j < 14; j++){
+				lcd_goto_xy(j, i+1);
+				lcd_chr(map1[i][j]);
+			}
+		}
+		
+	}
+	else if (phase == 0x02){
+		for (int i = 0; i < 5; i++){
+			for(int j = 0; j < 14; j++){
+				lcd_goto_xy(j, i+1);
+				lcd_chr(map2[i][j]);
+			}
+		}
+	}
+	else if (phase == 0x03){
+		for (int i = 0; i < 5; i++){
+			for(int j = 0; j < 14; j++){
+				lcd_goto_xy(j, i+1);
+				lcd_chr(map3[i][j]);
+			}
 		}
 	}
 }
 
+unsigned char getCharAtPos(unsigned char phase, unsigned char x, unsigned char y){
+	if (phase == 0x01) return map1[x][y];
+	else if (phase == 0x02) return map2[x][y];
+	else if (phase == 0x03) return map3[x][y];
+	return 'q';
+}
 
-//Microcontroller #1
 //1 is left, 0 is right, 2 is up, 3 is down
 enum Maze{MStart, MWait, MInstructions, MPlay, MDone};
 int MazeTick(int state){
 	static unsigned char player_x;
 	static unsigned char player_y;
-	static unsigned char time_count;
+	static unsigned short time_count;
 	unsigned char joystick_input;
 	static unsigned char answer;
 	static unsigned char buttonPress;
+	unsigned char otherPlayer; //0x04 left, 0x05 right, 0x06 up, 0x07 down from 0
 	switch(state){
 		case MStart:
 		player_x = 0;
@@ -514,23 +729,28 @@ int MazeTick(int state){
 		break;
 
 		case MWait:
-		if (interrupt && game_on)
+		if (interrupt && game_on && game_index == 4)
 		{
 			player_x = 0;
 			player_y = 2;
 			time_count = 0;
 			state = MInstructions;
+			otherPlayer = 0;
+			joystick_input = 0;
+			buttonPress = 0;
 			lcd_goto_xy(0,1);
-			lcd_string_format("Get out of themaze. Press A to confirm\nmovement.");
+			//lcd_string_format("Exit the maze You can only\nmove left &\nright. Go to  the G. Avoid X");/********Microcontroller 1********/
+			lcd_string_format("Exit the maze You can only\nmove up & downGo to the G\nAvoid X");/********Microcontroller 2********/
+			Player.totalM++;
 		}
 		break;
 
 		case MInstructions:
-		if (time_count == 40){
+		if (time_count == 60){
 			state = MPlay;
 			time_count = 0;
 			lcd_clear_space(1, 5);
-			generate_map1();
+			generate_map(phase);
 			lcd_goto_xy(player_x, player_y);
 			lcd_chr('0');
 		}
@@ -538,7 +758,33 @@ int MazeTick(int state){
 		break;
 
 		case MPlay:
-		if (time_count >= 250){
+		//Get movement from other player if taken
+		if (USART_HasReceived(0)){
+			otherPlayer = USART_Receive(0);
+			USART_Flush(0);
+			lcd_goto_xy(player_x,player_y);
+			lcd_chr(' ');
+			//player_y = otherPlayer; /********Microcontroller 1********/
+			player_x = otherPlayer; /********Microcontroller 2********/
+			otherPlayer = 0;
+			lcd_goto_xy(player_x,player_y);
+			lcd_chr('0');
+		}
+		//If the other player stepped on an X
+		if (USART_HasReceived(1)){
+			otherPlayer = USART_Receive(1);
+			USART_Flush(1);
+			if (otherPlayer == 0x01){
+				state = MDone;
+				time_count = 0;
+				lcd_clear_space(1, 5);
+				printPictureAtPos(wrong, 0, 1, 84, 30);
+				win = 0;
+				break;
+			}
+
+		}
+		if (time_count >= 300){ //30 seconds to get out of the maze
 			state = MDone;
 			time_count = 0;
 			lcd_clear_space(1, 5);
@@ -548,7 +794,10 @@ int MazeTick(int state){
 		}
 		else time_count++;
 
+		//Get input from player
 		joystick_input = checkInput();
+		/********Microcontroller 1********/
+		/*
 		if (joystick_input == 0 || joystick_input == 1){
 			printArrow(joystick_input, 0, 5);
 			answer = joystick_input;
@@ -563,24 +812,53 @@ int MazeTick(int state){
 			else if (answer == 0 && player_x != 13) player_x++;
 			lcd_goto_xy(player_x,player_y);
 			lcd_chr('0');
+
+			///Update the position of the other player
+			if (USART_IsSendReady(0)) USART_Send(player_x, 0);
 		}
 		else if (GetBit(PINC,3)==1) buttonPress = 0;
+		//*/
 
-		if (player_x == 12 && player_y == 5){
+		/*********Microcontroller 2********/
+		
+		if (joystick_input == 2 || joystick_input == 3){
+			printArrow(joystick_input, 0, 5);
+			answer = joystick_input;
+		}
+		if (GetBit(PINC,3)==0 && buttonPress == 0 && joystick_input != '\0') {
+			buttonPress = 1;
+			lcd_goto_xy(0, 5);
+			lcd_chr(' ');
+			lcd_goto_xy(player_x,player_y);
+			lcd_chr(' ');
+			if (answer == 2 && player_y != 1) player_y--;
+			else if (answer == 3 && player_y != 5) player_y++;
+			lcd_goto_xy(player_x,player_y);
+			lcd_chr('0');
+
+			///Update the position of the other player
+			if (USART_IsSendReady(0)) USART_Send(player_y, 0);
+		}
+		else if (GetBit(PINC,3)==1) buttonPress = 0;
+	
+
+		//*/
+		if (getCharAtPos(phase, player_y - 1, player_x) == 'G'){
 			state = MDone;
 			time_count = 0;
 			lcd_clear_space(1, 5);
 			printPictureAtPos(completed, 0, 1, 84, 30);
 			win = 1;
-			Player.SSwin++;
+			Player.Mwin++;
 			break;
 		}
-		if (map[player_y - 1][player_x] == 'x'){
+		if (getCharAtPos(phase, player_y - 1, player_x) == 'x'){
 			state = MDone;
 			time_count = 0;
 			lcd_clear_space(1, 5);
 			printPictureAtPos(wrong, 0, 1, 84, 30);
 			win = 0;
+			if (USART_IsSendReady(1)) USART_Send(0x01, 1);
 			break;
 		}
 		
@@ -596,7 +874,6 @@ int MazeTick(int state){
 			time_count = 0;
 			break;
 		}
-		break;
 		break;
 	}
 	return state;

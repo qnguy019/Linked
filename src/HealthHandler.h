@@ -6,6 +6,7 @@ int updateHealthTick(int state){
 	static unsigned char decrease_count;
 	static unsigned char decrement;
 	unsigned char receiveHealth = 0;
+	static unsigned char player_dead;
 	switch (state){
 		case UHStart:
 		state = UHWait;
@@ -13,13 +14,15 @@ int updateHealthTick(int state){
 		health2 = 0;
 		decrease_count = 0;
 		decrement = 0;
+		player_dead = 0;
 		break;
 		
 		case UHWait:
 		if (game_on){
 			state = UHOn;
 			decrease_count = 0;
-			decrement = 70;
+			decrement = 50;
+			player_dead = 0;
 		}
 		break;
 
@@ -29,10 +32,11 @@ int updateHealthTick(int state){
 			state = UHStart;
 		}
 		else if (game_on){
-			if (phase == 0x01) decrement = 70;
-			else if (phase == 0x02) decrement = 65;
-			else if (phase == 0x03) decrement = 60;
-			if (decrease_count == decrement){
+			if (player_dead) decrement = 10;
+			else if (phase == 0x01) decrement = 50;
+			else if (phase == 0x02) decrement = 45;
+			else if (phase == 0x03) decrement = 40;
+			if (decrease_count >= decrement){
 				health = health >> 1;
 				decrease_count = 0;
 			}
@@ -51,9 +55,11 @@ int updateHealthTick(int state){
 				health = health << 4;
 				health |= 0x0F;
 				receiveHealth = 0;
-				if (health & 0x03FF) health = 0x03FF;
+				if (health > 0x03FF) health = 0x03FF;
 			}
-
+			else if  (receiveHealth == 0x55){
+				player_dead = 1;
+			}
 			//output the health
 			health1 = (char)health;
 			health2 = (char)(health >> 8);
@@ -62,9 +68,13 @@ int updateHealthTick(int state){
 			else SetBit(PORTA, 6, 0);
 			if (GetBit(health2, 1) == 1) PORTA |= (0x01 << 7);
 			else SetBit(PORTA, 7, 0);
-			if (health == 0) game_on = 0;
-		}
+			if (health == 0){
+				game_on = 0;
+				outputEndGame();
+				if (USART_IsSendReady(0)) USART_Send(0x55, 0);
+			}
 		break;
+		}
 	}
 	return state;
 };
