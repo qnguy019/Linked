@@ -1,7 +1,10 @@
 #Linked
 name1 = Quynh Nguyen
+
 ucrnetid = qnguy019
+
 Google Drive Folder: http://bit.ly/1U7XFjF
+
 ##Introduction
 Linked is a two-player cooperative game that involves solving mini games to keep your partner alive. The objective of the game is to survive as long as possible.
 
@@ -10,7 +13,6 @@ There will be five mini games that each player will play (4 individual and 1 coo
 As time progresses, the player’s life will decrease. The only way to increase your life is for your partner to win their minigame. A player fails the minigame either by putting in the incorrect answer or the minigame time duration running out. If that is the case, then their partner will not receive any life. 
 The mini games become harder over time by either decreasing the amount of time to input an answer or increasing a sequence so it will be harder to memorize. The player’s life will also decrease faster as time passes. 
 For joystick input, you have to move in the direction that you want to go and press A to confirm your choice. The other instructions for each mini game are given during the game. 
-Assignment 1: Single commands, Multi commands, Exit command, Comments
 
 ##File Information
 #####src
