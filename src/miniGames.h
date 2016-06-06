@@ -271,7 +271,7 @@ int SimonSaysTick(int state){
 		break;
 
 		case SSAnswer:
-		if (time_count >= 110){
+		if (time_count >= 200){
     		state = SSDone;
     		time_count = 0;
     		lcd_clear_space(1, 5);
