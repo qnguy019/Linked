@@ -1,6 +1,6 @@
 enum Game_Handler {Start, INTRO, OFF, ON, PACT, AWAIT_PACT, INSTRUCTIONS, ENDGAME};
 int Game_Handler_Tick(int state){
-	static unsigned instruction_index;
+	static unsigned char instruction_index;
 	unsigned char keyPress = 0;
 	unsigned char startGame = 0;
 	unsigned char response = 0;
